@@ -16,12 +16,12 @@ Follow these steps to set up the project locally:
 
 ```bash
 # Clone the repository
-git clone https://github.com/your-username/image-processing-dashboard.git
+git clone https://github.com/Ramzi-444/Dip-dashboard.git
 
 # Navigate to the project directory
 cd image-processing-dashboard
 
-# Open the HTML file directly in a browser or deploy on a web server
+# Open the HTML via live server
 ```
 
 ## Usage
@@ -75,6 +75,4 @@ If you want to contribute:
    ```
 5. Open a pull request.
 
-## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
