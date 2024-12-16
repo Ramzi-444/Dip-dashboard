@@ -58,7 +58,7 @@ cd image-processing-dashboard
 
 
 ### Main Dashboard
-![Main Dashboard](screenshots/main-dashboard.png)
+![Main Dashboard]('/Applications/Screenshot/Screenshot 2024-12-16 at 23.43.09.png')
 
 ### Image Upload
 ![Image Upload](screenshots/image-upload.png)
