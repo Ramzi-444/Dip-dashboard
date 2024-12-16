@@ -1,0 +1,1279 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Processing Dashboard</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f2f5;
+        }
+
+        .container {
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .sidebar {
+            background-color: #2c3e50;
+            padding: 20px;
+            width: 250px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+            overflow-y: auto;
+        }
+
+        .sidebar h2 {
+            color: #ecf0f1;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+            text-align: center;
+        }
+
+        .sidebar button {
+            background-color: #34495e;
+            border: none;
+            color: white;
+            padding: 12px 20px;
+            text-align: left;
+            font-size: 14px;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: background-color 0.3s, transform 0.2s;
+            position: relative;
+        }
+
+        .sidebar button:hover {
+            background-color: #1abc9c;
+            transform: translateX(5px);
+        }
+
+        .sidebar button.active {
+            background-color: #16a085;
+            transform: translateX(5px);
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 30px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+            background: linear-gradient(135deg, #f5f7fa, #c3cfe2);
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 2em;
+            margin-bottom: 10px;
+            color: #2c3e50;
+        }
+
+        .file-inputs {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        .file-inputs input[type="file"] {
+            padding: 10px;
+            border: 2px solid #ccc;
+            border-radius: 4px;
+            background-color: white;
+            cursor: pointer;
+            transition: border-color 0.3s;
+        }
+
+        .file-inputs input[type="file"]:hover {
+            border-color: #1abc9c;
+        }
+
+        .image-container {
+            display: flex;
+            justify-content: space-around;
+            gap: 30px;
+            flex-wrap: wrap;
+        }
+
+        .image-box {
+            flex: 1;
+            background-color: rgba(255, 255, 255, 0.9);
+            border: 1px solid #ddd;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            max-width: 45%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: transform 0.3s;
+        }
+
+        .image-box:hover {
+            transform: translateY(-5px);
+        }
+
+        .image-box h3 {
+            margin-bottom: 15px;
+            color: #34495e;
+        }
+
+        .image-box canvas {
+            max-width: 100%;
+            height: auto;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        .progress-bar-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+        }
+
+        .progress-bar-container label {
+            font-size: 1em;
+            margin-bottom: 10px;
+            color: #34495e;
+        }
+
+        .progress-bar {
+            width: 80%;
+            height: 25px;
+            background-color: #dcdcdc;
+            border-radius: 12.5px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2);
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background-color: #27ae60;
+            width: 0;
+            transition: width 0.5s ease-in-out;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .compression-info {
+            text-align: center;
+            margin-top: 10px;
+            font-size: 14px;
+            color: #34495e;
+        }
+
+        /* Detailed Compression Information */
+        .detailed-compression-info {
+            text-align: center;
+            margin-top: 10px;
+            font-size: 14px;
+            color: #34495e;
+        }
+
+        /* Controls Section */
+        .controls {
+            display: none;
+            /* Hidden by default */
+            flex-direction: column;
+            gap: 20px;
+            background-color: rgba(255, 255, 255, 0.95);
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            max-width: 60%;
+            margin: 0 auto;
+            transition: all 0.3s ease-in-out;
+        }
+
+        .controls.active {
+            display: flex;
+        }
+
+        .control-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .control-group label {
+            flex: 1;
+            font-size: 1em;
+            color: #34495e;
+        }
+
+        .control-group input[type="range"] {
+            flex: 2;
+        }
+
+        /* Loading Indicator */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(240, 242, 245, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            display: none;
+            /* Hidden by default */
+        }
+
+        .loading-overlay.active {
+            display: flex;
+        }
+
+        .spinner {
+            border: 8px solid #f3f3f3;
+            border-top: 8px solid #1abc9c;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Download Button */
+        .download-section {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .download-section a {
+            text-decoration: none;
+        }
+
+        .download-section button {
+            background-color: #1abc9c;
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            font-size: 14px;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+
+        .download-section button:disabled {
+            background-color: #95a5a6;
+            cursor: not-allowed;
+        }
+
+        .download-section button:hover:not(:disabled) {
+            background-color: #16a085;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .image-container {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .image-box {
+                max-width: 80%;
+            }
+
+            .progress-bar {
+                width: 100%;
+            }
+
+            .controls {
+                max-width: 90%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Loading Indicator -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="spinner"></div>
+    </div>
+
+    <div class="container">
+        <div class="sidebar">
+            <h2>Algorithms</h2>
+            <button>Image Sampling</button>
+            <button>Quantization</button>
+            <button>Min-Max Normalization</button>
+            <button>Histogram Matching</button>
+            <button>Image Matching</button>
+            <button>Image Restoration</button>
+            <button>Convolution</button>
+            <button>Noise</button>
+            <button>Padding</button>
+            <button>Compression</button>
+            <button>Run Length Encoding</button>
+            <button>Huffman Encoding</button>
+            <button>Arithmetic Encoding</button>
+            <!-- New Algorithm Buttons -->
+            <button>Edge Detection</button>
+            <button>Gaussian Blur</button>
+            <button>Sobel Filter</button>
+            <button>Median Filter</button>
+            <button>Brightness Adjustment</button>
+            <button>Contrast Enhancement</button>
+        </div>
+
+        <div class="main-content">
+            <h1> Image Processing Dashboard</h1>
+            <div class="file-inputs">
+                <input type="file" id="fileInput" accept="image/*" title="Upload Image">
+                <input type="file" id="referenceFileInput" accept="image/*" title="Optional: For Histogram Matching">
+            </div>
+            <div class="image-container">
+                <div class="image-box">
+                    <h3>Input Image</h3>
+                    <canvas id="inputCanvas"></canvas>
+                </div>
+                <div class="image-box">
+                    <h3>Processed Image</h3>
+                    <canvas id="outputCanvas"></canvas>
+                </div>
+            </div>
+            <div class="progress-bar-container">
+                <label for="compressionBar">Compression Efficiency:</label>
+                <div class="progress-bar">
+                    <div class="progress-bar-fill" id="progressFill"></div>
+                </div>
+                <div id="compressionInfo" class="compression-info"></div>
+                <!-- Detailed Compression Statistics -->
+                <div id="detailedCompressionInfo" class="detailed-compression-info"></div>
+            </div>
+
+            <!-- Download Button -->
+            <div class="download-section">
+                <a id="downloadButton" href="#" download="processed_image.jpg">
+                    <button id="downloadButtonInner" disabled>Download Processed Image</button>
+                </a>
+            </div>
+
+            <!-- New Controls Section -->
+            <div class="controls" id="controlsSection">
+                <div class="control-group" id="brightnessControl">
+                    <label for="brightnessSlider">Brightness Adjustment:</label>
+                    <input type="range" id="brightnessSlider" min="-100" max="100" value="0">
+                </div>
+                <div class="control-group" id="contrastControl">
+                    <label for="contrastSlider">Contrast Enhancement:</label>
+                    <input type="range" id="contrastSlider" min="-100" max="100" value="0">
+                </div>
+                <!-- Add more sliders for other algorithms as needed -->
+                <div class="control-group" id="gaussianBlurControl" style="display: none;">
+                    <label for="gaussianBlurSlider">Gaussian Blur Intensity:</label>
+                    <input type="range" id="gaussianBlurSlider" min="1" max="10" value="1">
+                </div>
+                <div class="control-group" id="medianFilterControl" style="display: none;">
+                    <label for="medianFilterSlider">Median Filter Intensity:</label>
+                    <input type="range" id="medianFilterSlider" min="1" max="10" value="1">
+                </div>
+                <div class="control-group" id="edgeDetectionControl" style="display: none;">
+                    <label for="edgeDetectionSlider">Edge Detection Intensity:</label>
+                    <input type="range" id="edgeDetectionSlider" min="1" max="10" value="1">
+                </div>
+                <!-- Add more controls as needed -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize variables and get DOM elements
+        const algorithms = [
+            'Image Sampling',
+            'Quantization',
+            'Min-Max Normalization',
+            'Histogram Matching',
+            'Image Matching',
+            'Image Restoration',
+            'Convolution',
+            'Noise',
+            'Padding',
+            'Compression',
+            'Run Length Encoding',
+            'Huffman Encoding',
+            'Arithmetic Encoding',
+            'Edge Detection',
+            'Gaussian Blur',
+            'Sobel Filter',
+            'Median Filter',
+            'Brightness Adjustment',
+            'Contrast Enhancement'
+        ];
+
+        const encodingAlgorithms = new Set([
+            'Run Length Encoding',
+            'Huffman Encoding',
+            'Arithmetic Encoding',
+            'Compression' // Assuming Compression uses Run Length Encoding
+        ]);
+
+        const algorithmButtons = document.querySelectorAll('.sidebar button');
+        const fileInput = document.getElementById('fileInput');
+        const referenceFileInput = document.getElementById('referenceFileInput');
+        const inputCanvas = document.getElementById('inputCanvas');
+        const outputCanvas = document.getElementById('outputCanvas');
+        const inputCtx = inputCanvas.getContext('2d');
+        const outputCtx = outputCanvas.getContext('2d');
+        const progressFill = document.getElementById('progressFill');
+        const compressionInfo = document.getElementById('compressionInfo');
+        const detailedCompressionInfo = document.getElementById('detailedCompressionInfo');
+        const controlsSection = document.getElementById('controlsSection');
+        const brightnessSlider = document.getElementById('brightnessSlider');
+        const contrastSlider = document.getElementById('contrastSlider');
+        const loadingOverlay = document.getElementById('loadingOverlay');
+
+        // Additional sliders for other algorithms
+        const gaussianBlurSlider = document.getElementById('gaussianBlurSlider');
+        const medianFilterSlider = document.getElementById('medianFilterSlider');
+        const edgeDetectionSlider = document.getElementById('edgeDetectionSlider');
+
+        const gaussianBlurControl = document.getElementById('gaussianBlurControl');
+        const medianFilterControl = document.getElementById('medianFilterControl');
+        const edgeDetectionControl = document.getElementById('edgeDetectionControl');
+
+        let referenceImage = new Image();
+        let originalImageData = null; // To store the original image data for resetting
+
+        // Create Web Worker for encoding algorithms
+        let encodingWorker = null;
+        if (window.Worker) {
+            encodingWorker = new Worker('encodingWorker.js');
+
+            // Listen for messages from the worker
+            encodingWorker.onmessage = function (e) {
+                const { outputData, originalSize, compressedSize, error } = e.data;
+
+                // Hide loading overlay
+                loadingOverlay.classList.remove('active');
+
+                if (error) {
+                    alert(`Worker Error: ${error}`);
+                    return;
+                }
+
+                if (outputData && originalSize && compressedSize) {
+                    // Reconstruct ImageData
+                    const uint8Array = new Uint8ClampedArray(outputData.data);
+                    const processedImageData = new ImageData(uint8Array, outputData.width, outputData.height);
+
+                    // Display the processed image
+                    outputCtx.putImageData(processedImageData, 0, 0);
+
+                    // Show compression information
+                    compressionInfo.innerText = `Original Size: ${originalSize.toLocaleString()} bits, Compressed Size: ${compressedSize.toLocaleString()} bits`;
+
+                    // Calculate compression percentage
+                    let compressionPercentage = ((originalSize - compressedSize) / originalSize) * 100;
+                    compressionPercentage = Math.max(0, compressionPercentage).toFixed(2); // Ensure it's non-negative and format to 2 decimals
+
+                    // Update progress bar
+                    progressFill.style.width = `${compressionPercentage}%`;
+                    progressFill.innerText = `${compressionPercentage}%`; // Display percentage inside the bar
+
+                    // Update detailed compression info
+                    detailedCompressionInfo.innerText = `Compression Ratio: ${(originalSize / compressedSize).toFixed(2)}:1`;
+
+                    // Log the compression details
+                    // Removed processing logs as per user request
+
+                    // Enable the download button
+                    enableDownload();
+                }
+            };
+
+            // Handle worker errors
+            encodingWorker.onerror = function (e) {
+                // Hide loading overlay
+                loadingOverlay.classList.remove('active');
+                alert(`Worker Error: ${e.message}`);
+            };
+        } else {
+            alert('Web Workers are not supported in your browser.');
+        }
+
+        // Event listeners for algorithm buttons
+        algorithmButtons.forEach((button, index) => {
+            button.addEventListener('click', () => {
+                // Highlight the active button
+                algorithmButtons.forEach(btn => btn.classList.remove('active'));
+                button.classList.add('active');
+
+                processImage(algorithms[index]);
+
+                // Show or hide controls based on the selected algorithm
+                if (algorithms[index] === 'Brightness Adjustment' || algorithms[index] === 'Contrast Enhancement') {
+                    controlsSection.classList.add('active');
+                } else {
+                    controlsSection.classList.remove('active');
+                }
+
+                // Show relevant sliders based on the selected algorithm
+                showRelevantSliders(algorithms[index]);
+            });
+        });
+
+        // Function to show relevant sliders based on the selected algorithm
+        function showRelevantSliders(algorithm) {
+            // Hide all additional controls
+            gaussianBlurControl.style.display = 'none';
+            medianFilterControl.style.display = 'none';
+            edgeDetectionControl.style.display = 'none';
+
+            switch (algorithm) {
+                case 'Gaussian Blur':
+                    gaussianBlurControl.style.display = 'flex';
+                    break;
+                case 'Median Filter':
+                    medianFilterControl.style.display = 'flex';
+                    break;
+                case 'Edge Detection':
+                    edgeDetectionControl.style.display = 'flex';
+                    break;
+                // Add more cases if you add more sliders
+                default:
+                    // Do nothing
+                    break;
+            }
+        }
+
+        // Event listener for main image upload
+        fileInput.addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const img = new Image();
+                    img.src = e.target.result;
+                    img.onload = () => {
+                        inputCanvas.width = img.width;
+                        inputCanvas.height = img.height;
+                        outputCanvas.width = img.width;
+                        outputCanvas.height = img.height;
+                        inputCtx.drawImage(img, 0, 0);
+                        outputCtx.drawImage(img, 0, 0);
+                        originalImageData = inputCtx.getImageData(0, 0, inputCanvas.width, inputCanvas.height);
+                        resetCompressionInfo();
+                        // Removed processing logs
+                    };
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Event listener for reference image upload (for Histogram Matching)
+        referenceFileInput.addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    referenceImage.src = e.target.result;
+                    referenceImage.onload = () => {
+                        // Reference image loaded
+                    };
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Function to process the image based on the selected algorithm
+        function processImage(algorithm) {
+            console.log(`Processing image with ${algorithm}`);
+
+            if (!originalImageData) {
+                alert('Please upload an input image first.');
+                return;
+            }
+
+            const inputData = originalImageData;
+            let outputData;
+            let compressionDetails = ''; // Variable to hold compression info
+
+            if (encodingAlgorithms.has(algorithm)) {
+                // Show loading overlay
+                loadingOverlay.classList.add('active');
+
+                // Send image data to the worker
+                // Clone the ImageData to transfer the buffer
+                const clonedData = new ImageData(new Uint8ClampedArray(inputData.data), inputData.width, inputData.height);
+                encodingWorker.postMessage({ algorithm, imageData: clonedData }, [clonedData.data.buffer]);
+            } else {
+                // Handle non-encoding algorithms on the main thread
+                switch (algorithm) {
+
+                    case 'Image Sampling':
+                        outputData = imageSampling(inputData);
+                        break;
+
+                    case 'Quantization':
+                        outputData = quantization(inputData);
+                        break;
+
+                    case 'Min-Max Normalization':
+                        outputData = minMaxNormalization(inputData);
+                        break;
+
+                    case 'Histogram Matching':
+                        if (referenceImage.src) {
+                            const referenceCanvas = document.createElement('canvas');
+                            referenceCanvas.width = referenceImage.width;
+                            referenceCanvas.height = referenceImage.height;
+                            const referenceCtx = referenceCanvas.getContext('2d');
+                            referenceCtx.drawImage(referenceImage, 0, 0);
+
+                            const referenceData = referenceCtx.getImageData(0, 0, referenceCanvas.width, referenceCanvas.height);
+                            outputData = histogramMatchingRGB(inputData, referenceData);
+                        } else {
+                            alert("Please upload a reference image for Histogram Matching.");
+                            return;
+                        }
+                        break;
+
+                    case 'Image Matching':
+                        outputData = imageMatching(inputData);
+                        break;
+
+                    case 'Image Restoration':
+                        outputData = imageRestoration(inputData);
+                        break;
+
+                    case 'Convolution':
+                        // Convolution intensity could be adjusted via a slider if needed
+                        outputData = applyConvolution(inputData, [
+                            [0, -1, 0],
+                            [-1, 5, -1],
+                            [0, -1, 0] // Example sharpening kernel
+                        ]);
+                        break;
+
+                    case 'Noise':
+                        outputData = addNoise(inputData);
+                        break;
+
+                    case 'Padding':
+                        outputData = addPadding(inputData, 10); // Example padding of 10 pixels
+                        break;
+
+                    case 'Edge Detection':
+                        // Intensity can be adjusted via slider
+                        outputData = edgeDetection(inputData, parseInt(edgeDetectionSlider.value));
+                        break;
+
+                    case 'Gaussian Blur':
+                        // Intensity can be adjusted via slider
+                        outputData = gaussianBlur(inputData, parseInt(gaussianBlurSlider.value));
+                        break;
+
+                    case 'Sobel Filter':
+                        outputData = sobelFilter(inputData);
+                        break;
+
+                    case 'Median Filter':
+                        // Intensity can be adjusted via slider
+                        outputData = medianFilter(inputData, parseInt(medianFilterSlider.value));
+                        break;
+
+                    case 'Brightness Adjustment':
+                        // Brightness will be handled via slider
+                        outputData = brightnessAdjustment(inputData, parseInt(brightnessSlider.value));
+                        break;
+
+                    case 'Contrast Enhancement':
+                        // Contrast will be handled via slider
+                        outputData = contrastEnhancement(inputData, parseInt(contrastSlider.value));
+                        break;
+
+                    default:
+                        outputData = inputData;
+                }
+
+                // Display the processed image
+                outputCtx.putImageData(outputData, 0, 0);
+
+                // Reset compression info and progress bar
+                resetCompressionInfo();
+            }
+        }
+
+        // Function to enable download button
+        function enableDownload() {
+            const downloadButton = document.getElementById('downloadButton');
+            const downloadButtonInner = document.getElementById('downloadButtonInner');
+            const processedCanvas = document.getElementById('outputCanvas');
+
+            // Convert the canvas to a JPEG data URL
+            const jpegURL = processedCanvas.toDataURL('image/jpeg');
+
+            // Set the href of the download link to the JPEG URL
+            downloadButton.href = jpegURL;
+            downloadButton.download = 'processed_image.jpg'; // Set the desired file name and extension
+            downloadButtonInner.disabled = false;
+        }
+
+        // Function to reset the output image to the original
+        function resetOutputImage() {
+            if (originalImageData) {
+                outputCtx.putImageData(originalImageData, 0, 0);
+                resetCompressionInfo();
+            }
+        }
+
+        // Function to reset compression info and progress bar
+        function resetCompressionInfo() {
+            compressionInfo.innerText = '';
+            detailedCompressionInfo.innerText = '';
+            progressFill.style.width = '0%';
+            progressFill.innerText = ''; // Remove any text inside the progress bar
+        }
+
+        // Event listeners for sliders
+        brightnessSlider.addEventListener('input', () => {
+            const activeButton = document.querySelector('.sidebar button.active');
+            if (activeButton && activeButton.textContent === 'Brightness Adjustment') {
+                processImage('Brightness Adjustment');
+            }
+        });
+
+        contrastSlider.addEventListener('input', () => {
+            const activeButton = document.querySelector('.sidebar button.active');
+            if (activeButton && activeButton.textContent === 'Contrast Enhancement') {
+                processImage('Contrast Enhancement');
+            }
+        });
+
+        gaussianBlurSlider.addEventListener('input', () => {
+            const activeButton = document.querySelector('.sidebar button.active');
+            if (activeButton && activeButton.textContent === 'Gaussian Blur') {
+                processImage('Gaussian Blur');
+            }
+        });
+
+        medianFilterSlider.addEventListener('input', () => {
+            const activeButton = document.querySelector('.sidebar button.active');
+            if (activeButton && activeButton.textContent === 'Median Filter') {
+                processImage('Median Filter');
+            }
+        });
+
+        edgeDetectionSlider.addEventListener('input', () => {
+            const activeButton = document.querySelector('.sidebar button.active');
+            if (activeButton && activeButton.textContent === 'Edge Detection') {
+                processImage('Edge Detection');
+            }
+        });
+
+        // Image Processing Functions
+
+        function imageSampling(inputData) {
+            const outputWidth = Math.floor(inputData.width / 2);
+            const outputHeight = Math.floor(inputData.height / 2);
+            const output = new ImageData(outputWidth, outputHeight);
+            for (let y = 0; y < outputHeight; y++) {
+                for (let x = 0; x < outputWidth; x++) {
+                    const i = (y * 2 * inputData.width + x * 2) * 4;
+                    const j = (y * outputWidth + x) * 4;
+                    output.data[j] = inputData.data[i];
+                    output.data[j + 1] = inputData.data[i + 1];
+                    output.data[j + 2] = inputData.data[i + 2];
+                    output.data[j + 3] = inputData.data[i + 3];
+                }
+            }
+            return output;
+        }
+
+        function quantization(inputData) {
+            const output = new ImageData(inputData.width, inputData.height);
+            for (let i = 0; i < inputData.data.length; i += 4) {
+                output.data[i] = Math.round(inputData.data[i] / 64) * 64;
+                output.data[i + 1] = Math.round(inputData.data[i + 1] / 64) * 64;
+                output.data[i + 2] = Math.round(inputData.data[i + 2] / 64) * 64;
+                output.data[i + 3] = inputData.data[i + 3];
+            }
+            return output;
+        }
+
+        function minMaxNormalization(inputData) {
+            const output = new ImageData(inputData.width, inputData.height);
+            let min = 255, max = 0;
+            for (let i = 0; i < inputData.data.length; i += 4) {
+                const avg = Math.round((inputData.data[i] + inputData.data[i + 1] + inputData.data[i + 2]) / 3);
+                if (avg < min) min = avg;
+                if (avg > max) max = avg;
+            }
+            for (let i = 0; i < inputData.data.length; i += 4) {
+                const avg = Math.round((inputData.data[i] + inputData.data[i + 1] + inputData.data[i + 2]) / 3);
+                const normalized = ((avg - min) / (max - min)) * 255;
+                output.data[i] = output.data[i + 1] = output.data[i + 2] = clamp(normalized);
+                output.data[i + 3] = inputData.data[i + 3];
+            }
+            return output;
+        }
+
+        // Updated Histogram Matching Function for RGB
+        function histogramMatchingRGB(inputData, referenceData) {
+            const output = new ImageData(inputData.width, inputData.height);
+
+            // Separate histograms for R, G, B channels
+            const inputHistograms = { R: new Array(256).fill(0), G: new Array(256).fill(0), B: new Array(256).fill(0) };
+            const referenceHistograms = { R: new Array(256).fill(0), G: new Array(256).fill(0), B: new Array(256).fill(0) };
+
+            // Calculate histograms for input and reference images
+            for (let i = 0; i < inputData.data.length; i += 4) {
+                inputHistograms.R[inputData.data[i]]++;
+                inputHistograms.G[inputData.data[i + 1]]++;
+                inputHistograms.B[inputData.data[i + 2]]++;
+
+                referenceHistograms.R[referenceData.data[i]]++;
+                referenceHistograms.G[referenceData.data[i + 1]]++;
+                referenceHistograms.B[referenceData.data[i + 2]]++;
+            }
+
+            // Compute CDFs for each channel
+            const inputCDF = {
+                R: computeCDF(inputHistograms.R),
+                G: computeCDF(inputHistograms.G),
+                B: computeCDF(inputHistograms.B)
+            };
+            const referenceCDF = {
+                R: computeCDF(referenceHistograms.R),
+                G: computeCDF(referenceHistograms.G),
+                B: computeCDF(referenceHistograms.B)
+            };
+
+            // Create lookup tables for each channel
+            const lookupTables = { R: [], G: [], B: [] };
+            ['R', 'G', 'B'].forEach(channel => {
+                for (let i = 0; i < 256; i++) {
+                    let j = 0;
+                    while (j < 256 && referenceCDF[channel][j] < inputCDF[channel][i]) {
+                        j++;
+                    }
+                    lookupTables[channel][i] = j;
+                }
+            });
+
+            // Apply the lookup tables to map the input image to the reference histogram
+            for (let i = 0; i < inputData.data.length; i += 4) {
+                const r = inputData.data[i];
+                const g = inputData.data[i + 1];
+                const b = inputData.data[i + 2];
+
+                output.data[i] = lookupTables.R[r];
+                output.data[i + 1] = lookupTables.G[g];
+                output.data[i + 2] = lookupTables.B[b];
+                output.data[i + 3] = inputData.data[i + 3]; // Preserve alpha channel
+            }
+
+            return output;
+        }
+
+        // Helper function to compute CDF from histogram
+        function computeCDF(histogram) {
+            const cdf = new Array(256);
+            let cumulativeSum = 0;
+            const totalPixels = histogram.reduce((sum, val) => sum + val, 0);
+
+            for (let i = 0; i < 256; i++) {
+                cumulativeSum += histogram[i];
+                cdf[i] = cumulativeSum / totalPixels;
+            }
+
+            return cdf;
+        }
+
+        function imageMatching(inputData) {
+            const output = new ImageData(inputData.width, inputData.height);
+            output.data.set(inputData.data); // Copy original data
+
+            // Simulate a random matching area (50x50 red square)
+            const areaSize = 50;
+            const x = Math.floor(Math.random() * (inputData.width - areaSize));
+            const y = Math.floor(Math.random() * (inputData.height - areaSize));
+
+            for (let j = y; j < y + areaSize; j++) {
+                for (let i = x; i < x + areaSize; i++) {
+                    const index = (j * inputData.width + i) * 4;
+                    output.data[index] = 255; // Red
+                    output.data[index + 1] = 0; // Green
+                    output.data[index + 2] = 0; // Blue
+                    // Alpha remains the same
+                }
+            }
+
+            return output;
+        }
+
+        function imageRestoration(inputData) {
+            const kernel = [
+                [1 / 9, 1 / 9, 1 / 9],
+                [1 / 9, 1 / 9, 1 / 9],
+                [1 / 9, 1 / 9, 1 / 9]
+            ];
+            return applyConvolution(inputData, kernel);
+        }
+
+        function applyConvolution(inputData, kernel) {
+            const output = new ImageData(inputData.width, inputData.height);
+            const width = inputData.width;
+            const height = inputData.height;
+            const kernelSize = kernel.length;
+            const edge = Math.floor(kernelSize / 2);
+
+            for (let y = edge; y < height - edge; y++) {
+                for (let x = edge; x < width - edge; x++) {
+                    let r = 0, g = 0, b = 0;
+
+                    for (let ky = 0; ky < kernelSize; ky++) {
+                        for (let kx = 0; kx < kernelSize; kx++) {
+                            const pixelX = x + kx - edge;
+                            const pixelY = y + ky - edge;
+                            const pixelIndex = (pixelY * width + pixelX) * 4;
+
+                            r += inputData.data[pixelIndex] * kernel[ky][kx];
+                            g += inputData.data[pixelIndex + 1] * kernel[ky][kx];
+                            b += inputData.data[pixelIndex + 2] * kernel[ky][kx];
+                        }
+                    }
+
+                    const index = (y * width + x) * 4;
+                    output.data[index] = clamp(r);
+                    output.data[index + 1] = clamp(g);
+                    output.data[index + 2] = clamp(b);
+                    output.data[index + 3] = inputData.data[index + 3]; // Preserve alpha
+                }
+            }
+
+            return output;
+        }
+
+        // Helper function to clamp color values between 0 and 255
+        function clamp(value) {
+            return Math.max(0, Math.min(255, Math.round(value)));
+        }
+
+        function addNoise(inputData) {
+            const output = new ImageData(inputData.width, inputData.height);
+            output.data.set(inputData.data);
+
+            const noiseAmount = 0.05; // Adjust the noise amount as necessary
+
+            for (let i = 0; i < output.data.length; i += 4) {
+                if (Math.random() < noiseAmount) {
+                    const randValue = Math.random() < 0.5 ? 0 : 255;
+                    output.data[i] = output.data[i + 1] = output.data[i + 2] = randValue; // Salt-and-pepper noise
+                }
+            }
+
+            return output;
+        }
+
+        function addPadding(inputData, paddingSize) {
+            const paddedWidth = inputData.width + 2 * paddingSize;
+            const paddedHeight = inputData.height + 2 * paddingSize;
+            const output = new ImageData(paddedWidth, paddedHeight);
+
+            for (let y = 0; y < paddedHeight; y++) {
+                for (let x = 0; x < paddedWidth; x++) {
+                    const paddedIndex = (y * paddedWidth + x) * 4;
+
+                    // Check if the pixel is in the original image bounds
+                    if (x >= paddingSize && x < paddedWidth - paddingSize && y >= paddingSize && y < paddedHeight - paddingSize) {
+                        const originalIndex = ((y - paddingSize) * inputData.width + (x - paddingSize)) * 4;
+                        output.data[paddedIndex] = inputData.data[originalIndex];
+                        output.data[paddedIndex + 1] = inputData.data[originalIndex + 1];
+                        output.data[paddedIndex + 2] = inputData.data[originalIndex + 2];
+                        output.data[paddedIndex + 3] = inputData.data[originalIndex + 3];
+                    } else {
+                        // Fill padded area with black (or any other color)
+                        output.data[paddedIndex] = 0;
+                        output.data[paddedIndex + 1] = 0;
+                        output.data[paddedIndex + 2] = 0;
+                        output.data[paddedIndex + 3] = 255; // Full opacity
+                    }
+                }
+            }
+
+            return output;
+        }
+
+        // New Image Processing Functions
+
+        // Edge Detection using Laplacian Kernel with intensity
+        function edgeDetection(inputData, intensity) {
+            // Adjust the kernel based on intensity
+            const kernel = [
+                [0, intensity, 0],
+                [intensity, -4 * intensity, intensity],
+                [0, intensity, 0]
+            ];
+            return applyConvolution(inputData, kernel);
+        }
+
+        // Gaussian Blur with intensity (kernel size)
+        function gaussianBlur(inputData, intensity) {
+            // Adjust the kernel based on intensity
+            // For simplicity, we'll vary the sigma based on intensity
+            // Larger intensity means more blur
+            const sigma = intensity;
+            const kernelSize = 2 * Math.ceil(3 * sigma) + 1;
+            const kernel = generateGaussianKernel(kernelSize, sigma);
+            return applyConvolution(inputData, kernel);
+        }
+
+        // Sobel Filter for Edge Detection
+        function sobelFilter(inputData) {
+            const kernelX = [
+                [-1, 0, 1],
+                [-2, 0, 2],
+                [-1, 0, 1]
+            ];
+            const kernelY = [
+                [-1, -2, -1],
+                [0, 0, 0],
+                [1, 2, 1]
+            ];
+
+            const width = inputData.width;
+            const height = inputData.height;
+            const output = new ImageData(width, height);
+
+            for (let y = 1; y < height - 1; y++) {
+                for (let x = 1; x < width - 1; x++) {
+                    let sumX = 0, sumY = 0;
+
+                    for (let ky = 0; ky < 3; ky++) {
+                        for (let kx = 0; kx < 3; kx++) {
+                            const pixelIndex = ((y + ky - 1) * width + (x + kx - 1)) * 4;
+                            const gray = Math.round((inputData.data[pixelIndex] + inputData.data[pixelIndex + 1] + inputData.data[pixelIndex + 2]) / 3);
+                            sumX += gray * kernelX[ky][kx];
+                            sumY += gray * kernelY[ky][kx];
+                        }
+                    }
+
+                    const magnitude = Math.sqrt(sumX * sumX + sumY * sumY);
+                    const clamped = clamp(magnitude);
+
+                    const index = (y * width + x) * 4;
+                    output.data[index] = clamped;
+                    output.data[index + 1] = clamped;
+                    output.data[index + 2] = clamped;
+                    output.data[index + 3] = inputData.data[index + 3];
+                }
+            }
+
+            return output;
+        }
+
+        // Median Filter with intensity (kernel size)
+        function medianFilter(inputData, intensity) {
+            // Intensity can define the kernel size (must be odd)
+            const kernelSize = 2 * Math.ceil(intensity) + 1;
+            const edge = Math.floor(kernelSize / 2);
+            const output = new ImageData(inputData.width, inputData.height);
+
+            for (let y = edge; y < inputData.height - edge; y++) {
+                for (let x = edge; x < inputData.width - edge; x++) {
+                    let r = [], g = [], b = [];
+
+                    for (let ky = -edge; ky <= edge; ky++) {
+                        for (let kx = -edge; kx <= edge; kx++) {
+                            const pixelIndex = ((y + ky) * inputData.width + (x + kx)) * 4;
+                            r.push(inputData.data[pixelIndex]);
+                            g.push(inputData.data[pixelIndex + 1]);
+                            b.push(inputData.data[pixelIndex + 2]);
+                        }
+                    }
+
+                    r.sort((a, b) => a - b);
+                    g.sort((a, b) => a - b);
+                    b.sort((a, b) => a - b);
+
+                    const mid = Math.floor(r.length / 2);
+                    const index = (y * inputData.width + x) * 4;
+                    output.data[index] = r[mid];
+                    output.data[index + 1] = g[mid];
+                    output.data[index + 2] = b[mid];
+                    output.data[index + 3] = inputData.data[index + 3];
+                }
+            }
+
+            return output;
+        }
+
+        // Brightness Adjustment
+        function brightnessAdjustment(inputData, adjustment) {
+            const output = new ImageData(inputData.width, inputData.height);
+
+            for (let i = 0; i < inputData.data.length; i += 4) {
+                output.data[i] = clamp(inputData.data[i] + adjustment);     // Red
+                output.data[i + 1] = clamp(inputData.data[i + 1] + adjustment); // Green
+                output.data[i + 2] = clamp(inputData.data[i + 2] + adjustment); // Blue
+                output.data[i + 3] = inputData.data[i + 3]; // Alpha
+            }
+
+            return output;
+        }
+
+        // Contrast Enhancement using Histogram Stretching
+        function contrastEnhancement(inputData, adjustment) {
+            const output = new ImageData(inputData.width, inputData.height);
+            let min = 255, max = 0;
+
+            // Find min and max grayscale values
+            for (let i = 0; i < inputData.data.length; i += 4) {
+                const gray = Math.round((inputData.data[i] + inputData.data[i + 1] + inputData.data[i + 2]) / 3);
+                if (gray < min) min = gray;
+                if (gray > max) max = gray;
+            }
+
+            // Apply contrast stretching with adjustment
+            for (let i = 0; i < inputData.data.length; i += 4) {
+                const gray = Math.round((inputData.data[i] + inputData.data[i + 1] + inputData.data[i + 2]) / 3);
+                let stretched = ((gray - min) / (max - min)) * 255;
+
+                // Apply adjustment
+                stretched = stretched + adjustment;
+                stretched = clamp(stretched);
+
+                output.data[i] = output.data[i + 1] = output.data[i + 2] = stretched;
+                output.data[i + 3] = inputData.data[i + 3];
+            }
+
+            return output;
+        }
+
+        // Function to generate Gaussian Kernel
+        function generateGaussianKernel(size, sigma) {
+            const kernel = [];
+            const mean = Math.floor(size / 2);
+            let sum = 0;
+
+            for (let y = 0; y < size; y++) {
+                kernel[y] = [];
+                for (let x = 0; x < size; x++) {
+                    const exponent = -((x - mean) ** 2 + (y - mean) ** 2) / (2 * sigma ** 2);
+                    kernel[y][x] = (1 / (2 * Math.PI * sigma ** 2)) * Math.exp(exponent);
+                    sum += kernel[y][x];
+                }
+            }
+
+            // Normalize the kernel
+            for (let y = 0; y < size; y++) {
+                for (let x = 0; x < size; x++) {
+                    kernel[y][x] /= sum;
+                }
+            }
+
+            return kernel;
+        }
+
+        // Function to reset the output image to the original
+        function resetOutputImage() {
+            if (originalImageData) {
+                outputCtx.putImageData(originalImageData, 0, 0);
+                resetCompressionInfo();
+            }
+        }
+
+        // Function to reset compression info and progress bar
+        function resetCompressionInfo() {
+            compressionInfo.innerText = '';
+            detailedCompressionInfo.innerText = '';
+            progressFill.style.width = '0%';
+            progressFill.innerText = ''; // Remove any text inside the progress bar
+        }
+
+        // Image Processing Functions
+
+        // Removed processing logs as per user request
+
+        // --- Placeholder Functions for Missing Algorithms ---
+        // Implement these functions based on your requirements
+
+        // Example: Run Length Encoding (Handled by Web Worker)
+        // Example: Huffman Encoding (Handled by Web Worker)
+        // Example: Arithmetic Encoding (Handled by Web Worker)
+
+        // Edge Detection using Laplacian Kernel with intensity
+        // Already defined above
+
+        // Gaussian Blur with intensity
+        // Already defined above
+
+        // Sobel Filter for Edge Detection
+        // Already defined above
+
+        // Median Filter with intensity
+        // Already defined above
+
+        // Histogram Matching
+        // Already defined above
+
+        // Image Matching
+        // Already defined above
+
+        // Image Restoration
+        // Already defined above
+
+        // Convolution
+        // Already defined above
+
+        // Noise
+        // Already defined above
+
+        // Padding
+        // Already defined above
+
+        // Download Button Functionality
+        // Already handled in enableDownload()
+
+        // Function to handle download button enablement
+        function enableDownload() {
+            const downloadButton = document.getElementById('downloadButton');
+            const downloadButtonInner = document.getElementById('downloadButtonInner');
+            const processedCanvas = document.getElementById('outputCanvas');
+
+            // Convert the canvas to a JPEG data URL
+            const jpegURL = processedCanvas.toDataURL('image/jpeg');
+
+            // Set the href of the download link to the JPEG URL
+            downloadButton.href = jpegURL;
+            downloadButton.download = 'processed_image.jpg'; // Set the desired file name and extension
+            downloadButtonInner.disabled = false;
+        }
+
+        // --- Additional Intensity Adjustment Functions ---
+
+        // Implemented above (edgeDetection, gaussianBlur, medianFilter)
+
+    </script>
+</body>
+
+</html>
