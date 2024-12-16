@@ -62,6 +62,3 @@ cd image-processing-dashboard
 
 
 
-![Uploading Screenshot 2024-12-16 at 23.43.09.png…]()
-
-
