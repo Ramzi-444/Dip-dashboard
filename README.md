@@ -58,11 +58,9 @@ cd image-processing-dashboard
 
 
 ### Main Dashboard
-![Main Dashboard]('/Applications/Screenshot/Screenshot 2024-12-16 at 23.43.09.png')
+![Main Dashboard](/Applications/Screenshot/Screenshot%202024-12-16%20at%2023.43.09.png)
 
-### Image Upload
-![Image Upload](screenshots/image-upload.png)
 
-### Processed Image Example
-![Processed Image Example](screenshots/processed-image-example.png)
+
+
 
