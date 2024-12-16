@@ -58,6 +58,7 @@ cd image-processing-dashboard
 
 
 ### Main Dashboard
+![image alt](https://github.com/Ramzi-444/Dip-dashboard/blob/3c390ed96e8b5814d6c6bf2899d3423c9b49aabe/Screenshot%202024-12-16%20at%2023.43.09.png)
 
 
 
