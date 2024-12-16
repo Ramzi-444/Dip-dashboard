@@ -56,23 +56,13 @@ cd image-processing-dashboard
 - Real-time sliders for brightness and contrast adjustments.
 - Compression details and progress tracking.
 
-## Contributing
 
-If you want to contribute:
+### Main Dashboard
+![Main Dashboard](screenshots/main-dashboard.png)
 
-1. Fork the repository.
-2. Create a new branch:
-   ```bash
-   git checkout -b feature-name
-   ```
-3. Make your changes and commit them:
-   ```bash
-   git commit -m 'Add feature-name'
-   ```
-4. Push your changes:
-   ```bash
-   git push origin feature-name
-   ```
-5. Open a pull request.
+### Image Upload
+![Image Upload](screenshots/image-upload.png)
 
+### Processed Image Example
+![Processed Image Example](screenshots/processed-image-example.png)
 
