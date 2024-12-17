@@ -19,7 +19,7 @@ Follow these steps to set up the project locally:
 git clone https://github.com/Ramzi-444/Dip-dashboard.git
 
 # Navigate to the project directory
-cd image-processing-dashboard
+cd Dashboard
 
 # Open the HTML via live server
 ```
