@@ -7,8 +7,6 @@ Image Processing Dashboard: A comprehensive tool for applying various image proc
 - [Installation](#installation)
 - [Usage](#usage)
 - [Features](#features)
-- [Contributing](#contributing)
-- [License](#license)
 
 ## Installation
 
